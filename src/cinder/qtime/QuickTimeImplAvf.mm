@@ -288,7 +288,7 @@ void MovieBase::seekToTime( float seconds )
 	if( ! mPlayer )
 		return;
 	
-	CMTime seek_time = CMTimeMakeWithSeconds(seconds, [mPlayer currentTime].timescale);
+	CMTime seek_time = CMTimeMakeWithSeconds(seconds, 60000);
 	[mPlayer seekToTime:seek_time toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
 }
 
@@ -298,7 +298,7 @@ void MovieBase::seekToFrame( int frame )
 		return;
 	
 	CMTime currentTime = [mPlayer currentTime];
-	CMTime oneFrame = CMTimeMakeWithSeconds(1.0 / mFrameRate, currentTime.timescale);
+	CMTime oneFrame = CMTimeMakeWithSeconds(1.0 / mFrameRate, 60000);
 	CMTime startTime = kCMTimeZero;
 	CMTime addedFrame = CMTimeMultiply(oneFrame, frame);
 	CMTime added = CMTimeAdd(startTime, addedFrame);
@@ -332,7 +332,7 @@ void MovieBase::setActiveSegment( float startTime, float duration )
 	if( ! mPlayer || ! mPlayerItem )
 		return;
 	
-	int32_t scale = [mPlayer currentTime].timescale;
+	int32_t scale = 60000;
 	CMTime cm_start = CMTimeMakeWithSeconds(startTime, scale);
 	CMTime cm_duration = CMTimeMakeWithSeconds(startTime + duration, scale);
 	
