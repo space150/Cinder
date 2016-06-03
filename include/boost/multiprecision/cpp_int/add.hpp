@@ -55,7 +55,11 @@ inline void add_unsigned(CppInt1& result, const CppInt2& a, const CppInt3& b) BO
       if(!carry)
       {
          if(pa != pr)
+#if BOOST_WORKAROUND(BOOST_MSVC, >= 1600)
+            std::copy(pa, pa + (pr_end - pr), stdext::checked_array_iterator<limb_type*>(pr, result.size()));
+#else
             std::copy(pa, pa + (pr_end - pr), pr);
+#endif
          break;
       }
       carry += static_cast<double_limb_type>(*pa);
@@ -180,7 +184,11 @@ inline void subtract_unsigned(CppInt1& result, const CppInt2& a, const CppInt3& 
    }
    // Any remaining digits are the same as those in pa:
    if((x != i) && (pa != pr))
+#if BOOST_WORKAROUND(BOOST_MSVC, >= 1600)
+      std::copy(pa + i, pa + x, stdext::checked_array_iterator<limb_type*>(pr + i, result.size() - i));
+#else
       std::copy(pa + i, pa + x, pr + i);
+#endif
    BOOST_ASSERT(0 == borrow);
 
    //
@@ -203,13 +211,21 @@ inline void subtract_unsigned(CppInt1& result, const CppInt2& a, const limb_type
    result.resize(a.size(), a.size());
    typename CppInt1::limb_pointer pr = result.limbs();
    typename CppInt2::const_limb_pointer pa = a.limbs();
-   if(*pa > b)
+   if(*pa >= b)
    {
       *pr = *pa - b;
       if(&result != &a)
       {
+#if BOOST_WORKAROUND(BOOST_MSVC, >= 1600)
+         std::copy(pa + 1, pa + a.size(), stdext::checked_array_iterator<limb_type*>(pr + 1, result.size() - 1));
+#else
          std::copy(pa + 1, pa + a.size(), pr + 1);
+#endif
          result.sign(a.sign());
+      }
+      else if((result.size() == 1) && (*pr == 0))
+      {
+         result.sign(false); // zero is unsigned.
       }
    }
    else if(result.size() == 1)
@@ -230,7 +246,11 @@ inline void subtract_unsigned(CppInt1& result, const CppInt2& a, const limb_type
       if(&result != &a)
       {
          ++i;
+#if BOOST_WORKAROUND(BOOST_MSVC, >= 1600)
+         std::copy(pa + i, pa + a.size(), stdext::checked_array_iterator<limb_type*>(pr + i, result.size() - i));
+#else
          std::copy(pa + i, pa + a.size(), pr + i);
+#endif
       }
       result.normalize();
       result.sign(a.sign());
@@ -294,7 +314,7 @@ BOOST_MP_FORCEINLINE typename enable_if_c<!is_trivial_cpp_int<cpp_int_backend<Mi
       const signed_limb_type& o) BOOST_NOEXCEPT_IF((is_non_throwing_cpp_int<cpp_int_backend<MinBits1, MaxBits1, SignType1, Checked1, Allocator1> >::value))
 {
    if(o < 0)
-      eval_subtract(result, static_cast<limb_type>(-o));
+      eval_subtract(result, static_cast<limb_type>(boost::multiprecision::detail::unsigned_abs(o)));
    else if(o > 0)
       eval_add(result, static_cast<limb_type>(o));
 }
@@ -306,7 +326,7 @@ BOOST_MP_FORCEINLINE typename enable_if_c<!is_trivial_cpp_int<cpp_int_backend<Mi
       const signed_limb_type& o) BOOST_NOEXCEPT_IF((is_non_throwing_cpp_int<cpp_int_backend<MinBits1, MaxBits1, SignType1, Checked1, Allocator1> >::value))
 {
    if(o < 0)
-      eval_subtract(result, a, static_cast<limb_type>(-o));
+      eval_subtract(result, a, static_cast<limb_type>(boost::multiprecision::detail::unsigned_abs(o)));
    else if(o > 0)
       eval_add(result, a, static_cast<limb_type>(o));
    else if(&result != &a)
@@ -350,7 +370,7 @@ BOOST_MP_FORCEINLINE typename enable_if_c<!is_trivial_cpp_int<cpp_int_backend<Mi
    if(o)
    {
       if(o < 0)
-         eval_add(result, static_cast<limb_type>(-o));
+         eval_add(result, static_cast<limb_type>(boost::multiprecision::detail::unsigned_abs(o)));
       else
          eval_subtract(result, static_cast<limb_type>(o));
    }
@@ -365,7 +385,7 @@ BOOST_MP_FORCEINLINE typename enable_if_c<!is_trivial_cpp_int<cpp_int_backend<Mi
    if(o)
    {
       if(o < 0)
-         eval_add(result, a, static_cast<limb_type>(-o));
+         eval_add(result, a, static_cast<limb_type>(boost::multiprecision::detail::unsigned_abs(o)));
       else
          eval_subtract(result, a, static_cast<limb_type>(o));
    }
