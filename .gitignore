@@ -19,6 +19,8 @@ lib/msw/x64/cinder*.pdb
 lib/winrt/x86/cinder*.lib
 lib/winrt/x64/cinder*.lib
 
+*.VC.db
+
 # Windows cruft
 *.suo
 *.ncb
@@ -40,4 +42,3 @@ docs/*/node_modules
 # CinderBlocks
 blocks/
 !blocks/[__AppTemplates,Box2D,Cairo,FMOD,LocationManager,MotionManager,OSC,QuickTime,TUIO]
-
